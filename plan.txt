@@ -1,0 +1,14 @@
+Indexes:
+1. docId:NtotalTerms:NuniqueTerms:SDate
+2. termId:Nctf:Ndf:L[docIds:tf]
+3. docId:Terms
+4. Author:docId
+
+
+.I docId
+.T title
+.W contents
+.B Date of publication
+.A Author
+.N Date of Entry
+.X reference
