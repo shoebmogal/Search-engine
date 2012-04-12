@@ -16,7 +16,7 @@ X = "X" #ref
 termData = {} # term:L[ctf:df:D[docid:tf]]
 termsList = []
 stopwords_l = []
-
+termMapList = []
 def populateStopWords():
     with open('stoplist.txt',encoding='utf-8') as stopwords_file:
         for line in stopwords_file:
@@ -39,9 +39,14 @@ def getStr(dictP):
 
 
 def makeTermsList():
-    global termsList,termData
+    global termsList,termData,termMapList
+    offset = 0
     for term,data in termData.items():
-        termsList.append(term+" "+str(data[0])+" "+str(data[1])+getStr(data[2])+"\n")
+        Sstr=term+" "+str(data[0])+" "+str(data[1])+getStr(data[2])
+        termsList.append(Sstr)
+        lenSstr = len(Sstr)
+        termMapList.append(term+" "+str(offset)+" "+str(offset+lenSstr)+"\n")
+        offset = offset+lenSstr
 
 def fillTerms(docID,lTerms):
     global termData
@@ -93,11 +98,11 @@ def getDocStuff(dDocProps):
     return [sRet,lAllWords]
 
 def makeIndexes():
-    global T,W,B,A,N,I,dFileData,termData,termsList
+    global T,W,B,A,N,I,dFileData,termData,termsList,termMapList
     docFile = "docFile.txt"
     docWordsFile = "docWords.txt"
     termsFile = "terms.txt"
-
+    termsMapFile = "termsMap.txt"
     docList = []
     lDocWords = []
     lTerms = []
@@ -112,11 +117,12 @@ def makeIndexes():
     FILE = open(docFile,"w")
     FILE1 = open(docWordsFile,"w")
     FILE2 = open(termsFile,"w")
+    FILE3 = open(termsMapFile,"w")
     # Write all the lines at once:
     FILE.writelines(docList)
     FILE1.writelines(lDocWords)
     FILE2.writelines(termsList)
-    
+    FILE3.writelines(termMapList)    
 
 def fetchFromFile(fileName):
     global T,W,B,A,N,I,dFileData
