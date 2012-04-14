@@ -1,7 +1,14 @@
 import os
 import sys
 import re
+import mmap
 from collections import Counter
+import contextlib
+from math import log
+
+termSize = 15
+xencode = { 0:"00",1:"01",2:"02",3:"03",4:"04",5:"05",6:"06",7:"07",8:"08",9:"09","a":"10","b":"11","c":"12","d":"13","e":"14","f":"15","g":"16","h":"17","i":"18","j":"19","k":"20","l":"21","m":"22","n":"23","o":"24","p":"25","q":"26","r":"27","s":"28","t":"29","u":"30","v":"31","w":"32","x":"33","y":"34","z":"35"}
+
 
 
 #dFileContents = {} # {title:L,contents:L,date:L,author:L,entryDate:L}
@@ -17,6 +24,7 @@ termData = {} # term:L[ctf:df:D[docid:tf]]
 termsList = []
 stopwords_l = []
 termMapList = []
+
 def populateStopWords():
     with open('stoplist.txt',encoding='utf-8') as stopwords_file:
         for line in stopwords_file:
@@ -48,7 +56,7 @@ def makeTermsList():
         termMapList.append(term+" "+str(offset)+" "+str(offset+lenSstr)+"\n")
         offset = offset+lenSstr
 
-def fillTerms(docID,lTerms):
+def fillTerms1(docID,lTerms):
     global termData
     dWordsCnt = Counter(lTerms)
     for term,cnt in dWordsCnt.items():
@@ -67,6 +75,116 @@ def fillTerms(docID,lTerms):
            lTermProp[2] = tfX
 
        termData[term] = lTermProp
+
+
+def mergeTermFiles():
+    for root, subFolders, files in os.walk("./indexes/tmp"):
+        files.sort()
+    termFile = "./indexes/termsx.txt"
+    termMapFile = "./indexes/termsMapy.txt"
+    with open(termFile, "wb") as f:
+        f.write(b"*")
+    with open(termFile, "r+b") as f:
+        # memory-map the file, size 0 means whole file
+        map = mmap.mmap(f.fileno(), 0)
+
+    #with open(termMapFile, "wb") as f2:
+     #   f2.write(b"*")
+    with open(termMapFile, "wb") as f2:
+        # memory-map the file, size 0 means whole file
+      #  map2 = mmap.mmap(f2.fileno(), 0)
+        
+
+            
+
+        byteLen = 0
+        for filex in files:
+
+
+            with open("./indexes/tmp/"+filex, "r+b") as fx:
+                # memory-map the file, size 0 means whole file
+                map1 = mmap.mmap(fx.fileno(), 0)
+                map1.seek(0)
+                map.resize(map.size()+map1.size())
+                map.write(map1[0:])
+                map.flush()
+                
+                
+                Str = makeFixedLengthSpace(filex,20)+" "+makeFixedLengthStr(byteLen,6)+" "+makeFixedLengthStr(byteLen+map1.size(),6)+"\n"
+                f2.write(Str.encode("utf-8"))
+                byteLen = byteLen+map1.size()
+
+                
+        linesToAdd = 0
+        fullSize  = pow(2,int(log(map.size(),2)))+1
+        if (fullSize == map.size() ):
+            linesToAdd = 0
+        elif (fullSize < map.size()):
+            fullSize2  = pow(2,int(log(map.size(),2))+1)+1
+            linesToAdd = fullSize2 - map.size()
+        else:
+            linesToAdd = fullSize - map.size()
+
+        print(" Line to add : "+str(linesToAdd)+" mapSize"+str(map.size()))
+        
+        while linesToAdd > 0:
+            Str = makeFixedLengthSpace(str(linesToAdd)"_",20)+" "+makeFixedLengthStr(0,6)+" "+makeFixedLengthStr(0,6)+"\n"
+            print("Adding Line")
+            linesToAdd = linesToAdd-1
+            f2.write(Str.encode("utf-8"))
+            
+
+
+    #map.close()
+    #map1.close()
+    #map2.flush()
+    #map2.close()
+
+def fillTerms(docID,lTerms):
+    dWordsCnt = Counter(lTerms)
+    for term,cnt in dWordsCnt.items():
+        term = "./indexes/tmp/"+term
+        lTermProp = []
+        ctf = tf = cnt
+        df = 1
+        if os.path.isfile(term): 
+            with open(term, "r+b") as f:
+                # memory-map the file, size 0 means whole file
+                map = mmap.mmap(f.fileno(), 0)
+                ctfx = int(map[0:6])
+                dfx = int(map[7:13])
+                sctfx=makeFixedLengthStr(ctfx+ctf,6)
+                sdfx =makeFixedLengthStr(dfx+df,6)
+                sx = sctfx+" "+sdfx+" "
+                map.seek(0)
+                map.write(sx.encode("utf-8"))
+                map.flush()
+                
+                fileLen = map.size()
+                sdx = " "+str(docID)+" "+str(tf)
+                map.seek(fileLen-1)
+                map.resize(fileLen+len(sdx))
+                map.write(sdx.encode("utf-8"))
+                map.flush()
+                map.close
+        else:
+            with open(term, "wb") as f:
+                f.write(b"*")
+            with open(term, "r+b") as f:
+                # memory-map the file, size 0 means whole file
+                map = mmap.mmap(f.fileno(), 0)
+                sctfx=makeFixedLengthStr(ctf,6)
+                sdfx =makeFixedLengthStr(df,6)
+                sx = sctfx+" "+sdfx+" "+str(docID)+" "+str(tf)
+                map.seek(0)
+                map.resize(map.size()+len(sx))
+                sx=sx.encode("utf-8")
+                map.write(sx)
+                map.close
+
+        
+
+
 
 def getDocStuff(dDocProps):
     global T,W,B,A,N,I
@@ -94,32 +212,78 @@ def getDocStuff(dDocProps):
 
     #print("All words :", lAllWords,"\n")
     lUniqueWords = list(set(lAllWords))
-    sRet = str(len(lAllWords))+":"+str(len(lUniqueWords))+":"+dDocProps[B][0]
+    lenAllWords = len(lAllWords)
+    lenAllWords
+    sRet = makeFixedLengthStr(len(lAllWords),6)+" "+makeFixedLengthStr(len(lUniqueWords),6) #+":"+dDocProps[B][0]
     return [sRet,lAllWords]
+
+def makeFixedLengthStr(length,n):
+    sLen =  str(length)
+    zeros=""
+    #print(n-len(sLen))
+    while (n-len(sLen)) > 0:
+        zeros=zeros+"0"
+        #print(zeros)
+        n=n-1
+        
+    zeros = zeros+sLen
+    #print(zeros)
+    return zeros
+
+def makeFixedLengthSpace(length,n):
+    sLen =  str(length)
+    zeros=""
+    #print(n-len(sLen))
+    while (n-len(sLen)) > 0:
+        zeros=zeros+" "
+        #print(zeros)
+        n=n-1
+        
+    zeros = sLen+zeros
+    #print(zeros)
+    return zeros
+
+
 
 def makeIndexes():
     global T,W,B,A,N,I,dFileData,termData,termsList,termMapList
-    docFile = "docFile.txt"
-    docWordsFile = "docWords.txt"
-    termsFile = "terms.txt"
-    termsMapFile = "termsMap.txt"
+    docFile = "./indexes/d3.txt"
+    docWordsFile = "./indexes/docWords.txt"
+    termsFile = "./indexes/terms.txt"
+    termsMapFile = "./indexes/termsMap.txt"
     docList = []
     lDocWords = []
     lTerms = []
+    
+    with open(docFile, "wb") as f:
+     f.write(b"Hello Python!\n")
 
-    for docID,dProps in dFileData.items():
-        docList.append(docID+":"+getDocStuff(dProps)[0]+"\n")
-        sAllWords = " ".join(getDocStuff(dProps)[1])
-        lDocWords.append(docID+":"+sAllWords+"\n")
-        fillTerms(docID,getDocStuff(dProps)[1])
+    with open(docFile, "r+b") as f:
+        
+        # memory-map the file, size 0 means whole file
+        map = mmap.mmap(f.fileno(), 0)
+        map.resize(5000*14)
+        for docID,dProps in dFileData.items():
+            docList.append(makeFixedLengthStr(int(docID),6)+" "+getDocStuff(dProps)[0]+"\n")
+            map.seek(int(docID)*14)
+            str1 = getDocStuff(dProps)[0]+"\n"
+            map.write(str1.encode("utf-8"))
+            sAllWords = " ".join(getDocStuff(dProps)[1])
+            lDocWords.append(docID+":"+sAllWords+"\n")
+            fillTerms(docID,getDocStuff(dProps)[1])
+        
 
+       
+        map.close()
+    
+    mergeTermFiles()    
     makeTermsList()
-    FILE = open(docFile,"w")
+    #FILE = open(docFile,"w")
     FILE1 = open(docWordsFile,"w")
     FILE2 = open(termsFile,"w")
     FILE3 = open(termsMapFile,"w")
     # Write all the lines at once:
-    FILE.writelines(docList)
+    #FILE.writelines(docList)
     FILE1.writelines(lDocWords)
     FILE2.writelines(termsList)
     FILE3.writelines(termMapList)    
@@ -189,4 +353,5 @@ def main(fileName):
 #print(d)
 
 
-#main(sys.argv[1])
+main(sys.argv[1])
+

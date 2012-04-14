@@ -12,3 +12,7 @@ Indexes:
 .A Author
 .N Date of Entry
 .X reference
+
+
+"term" file format:
+123456 123456 docID tf
