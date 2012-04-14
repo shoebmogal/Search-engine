@@ -80,6 +80,29 @@ def fillTerms1(docID,lTerms):
 def mergeTermFiles():
     for root, subFolders, files in os.walk("./indexes/tmp"):
         files.sort()
+
+    linesToAdd = 0
+    linesinFile = len(files)
+    fullSize  = pow(2,int(log(linesinFile,2))+1)-1
+    if (fullSize == linesinFile ):
+        linesToAdd = 0
+    elif (fullSize < linesinFile):
+        fullSize2  = pow(2,int(log(linesinFile,2))+1)-1
+        linesToAdd = fullSize2 - linesinFile
+    else:
+        linesToAdd = fullSize - linesinFile
+        
+    print(" Line to add : "+str(linesToAdd)+" mapSize"+str(linesinFile))
+    while linesToAdd > 0:
+        Str = "_"+str(linesToAdd) #+" "+makeFixedLengthStr(0,6)+" "+makeFixedLengthStr(0,6)+"\n"
+         #   print("Adding Line")
+        linesToAdd = linesToAdd-1
+        files.append(Str)
+       
+    files.sort()
+
+
+
     termFile = "./indexes/termsx.txt"
     termMapFile = "./indexes/termsMapy.txt"
     with open(termFile, "wb") as f:
@@ -100,46 +123,32 @@ def mergeTermFiles():
         byteLen = 0
         for filex in files:
 
-
-            with open("./indexes/tmp/"+filex, "r+b") as fx:
+            if (filex[0:1] != "_"):
+                fx =  open("./indexes/tmp/"+filex, "r+b")
                 # memory-map the file, size 0 means whole file
                 map1 = mmap.mmap(fx.fileno(), 0)
                 map1.seek(0)
                 map.resize(map.size()+map1.size())
                 map.write(map1[0:])
                 map.flush()
-                
+            
                 
                 Str = makeFixedLengthSpace(filex,20)+" "+makeFixedLengthStr(byteLen,6)+" "+makeFixedLengthStr(byteLen+map1.size(),6)+"\n"
                 f2.write(Str.encode("utf-8"))
                 byteLen = byteLen+map1.size()
-
-                
-        linesToAdd = 0
-        fullSize  = pow(2,int(log(map.size(),2)))+1
-        if (fullSize == map.size() ):
-            linesToAdd = 0
-        elif (fullSize < map.size()):
-            fullSize2  = pow(2,int(log(map.size(),2))+1)+1
-            linesToAdd = fullSize2 - map.size()
-        else:
-            linesToAdd = fullSize - map.size()
-
-        print(" Line to add : "+str(linesToAdd)+" mapSize"+str(map.size()))
-        
-        while linesToAdd > 0:
-            Str = makeFixedLengthSpace(str(linesToAdd)"_",20)+" "+makeFixedLengthStr(0,6)+" "+makeFixedLengthStr(0,6)+"\n"
-            print("Adding Line")
-            linesToAdd = linesToAdd-1
-            f2.write(Str.encode("utf-8"))
+            else:
+                Str = makeFixedLengthSpace(filex,20)+" "+makeFixedLengthStr(0,6)+" "+makeFixedLengthStr(0,6)+"\n"
+                f2.write(Str.encode("utf-8"))
+               
             
-
-
+            
+            
+            
     #map.close()
     #map1.close()
     #map2.flush()
     #map2.close()
-
+            
 def fillTerms(docID,lTerms):
     dWordsCnt = Counter(lTerms)
     for term,cnt in dWordsCnt.items():

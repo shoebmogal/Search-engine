@@ -43,7 +43,7 @@ with open('./indexes/termMapFileSorted1.txt', 'r') as f:
             lData = sData.split()
             if(lData != []):
                 middle = (noOfNodes+1)//2
-                #middle=int(round(middle, 0))
+                middle=int(round(middle, 0))
                 
                 if(lData[0] == query):
                     return lData[1:]
@@ -52,7 +52,7 @@ with open('./indexes/termMapFileSorted1.txt', 'r') as f:
                     return search(query,index+1,middle,m1)
                 elif (query > lData[0]):
                     print (query+ " > "+lData[0]+" so go to index : "+str(index+middle))
-                    return search(query,index+middle,1+middle,m1)
+                    return search(query,index+middle,middle,m1)
                 
                 
                 else:
