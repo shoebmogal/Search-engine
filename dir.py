@@ -68,19 +68,20 @@ def search(query,index,noOfNodes):
 
 x = [] 
 
-for root, subFolders, files in os.walk(rootdir):
-    files.sort()
-    x = files
-    files = ['a','b','c','d','e','f','g','h','i']
+#for root, subFolders, files in os.walk(rootdir):
+#    files.sort()
+#    x = files
+#    files = ['a','b','c','d','e','f','g','h','i']
     #print(files)
     #print("Rec----------------------------------------------------")
-    bst(files)
+#    bst(files)
     #print("Proc----------------------------------------------------")
     #bst1(0,len(files),files)
 
 
-print(y)
+#print(y)
 
-print(y[search("g",0,len(files))])
+#print(y[search("g",0,len(files))])
 
 
+  

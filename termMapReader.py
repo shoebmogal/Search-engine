@@ -2,7 +2,7 @@ import os
 import sys
 import mmap
 import contextlib
-
+from porter import PorterStemmer
 # Now I will have to take the termMapy and convert it into a binary tree file
 with open('./indexes/termsMapy.txt', 'r') as f:
     with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
@@ -36,6 +36,8 @@ with open('./indexes/termMapFileSorted1.txt', 'r') as f:
     with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m1:
 
         def search(query,index,noOfNodes,m1):
+            p = PorterStemmer()
+            query = p.stem(query,0,len(query)-1)
             sData = m1[index*35:(index*35+35)]
             sData = sData.decode("utf-8")
 
@@ -51,7 +53,7 @@ with open('./indexes/termMapFileSorted1.txt', 'r') as f:
                     print (query+ " < "+lData[0])
                     return search(query,index+1,middle,m1)
                 elif (query > lData[0]):
-                    print (query+ " > "+lData[0]+" so go to index : "+str(index+middle))
+                    print (query+ " > "+lData[0]+" so go to  index : "+str(index+middle))
                     return search(query,index+middle,middle,m1)
                 
                 

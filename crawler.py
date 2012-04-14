@@ -5,6 +5,7 @@ import mmap
 from collections import Counter
 import contextlib
 from math import log
+from porter import PorterStemmer
 
 termSize = 15
 xencode = { 0:"00",1:"01",2:"02",3:"03",4:"04",5:"05",6:"06",7:"07",8:"08",9:"09","a":"10","b":"11","c":"12","d":"13","e":"14","f":"15","g":"16","h":"17","i":"18","j":"19","k":"20","l":"21","m":"22","n":"23","o":"24","p":"25","q":"26","r":"27","s":"28","t":"29","u":"30","v":"31","w":"32","x":"33","y":"34","z":"35"}
@@ -160,14 +161,14 @@ def fillTerms(docID,lTerms):
             with open(term, "r+b") as f:
                 # memory-map the file, size 0 means whole file
                 map = mmap.mmap(f.fileno(), 0)
-                ctfx = int(map[0:6])
-                dfx = int(map[7:13])
-                sctfx=makeFixedLengthStr(ctfx+ctf,6)
-                sdfx =makeFixedLengthStr(dfx+df,6)
-                sx = sctfx+" "+sdfx+" "
-                map.seek(0)
-                map.write(sx.encode("utf-8"))
-                map.flush()
+                #ctfx = int(map[0:6])
+                #dfx = int(map[7:13])
+                #sctfx=makeFixedLengthStr(ctfx+ctf,6)
+                #sdfx =makeFixedLengthStr(dfx+df,6)
+                #sx = sctfx+" "+sdfx+" "
+                #map.seek(0)
+                #map.write(sx.encode("utf-8"))
+                #map.flush()
                 
                 fileLen = map.size()
                 sdx = " "+str(docID)+" "+str(tf)
@@ -182,9 +183,9 @@ def fillTerms(docID,lTerms):
             with open(term, "r+b") as f:
                 # memory-map the file, size 0 means whole file
                 map = mmap.mmap(f.fileno(), 0)
-                sctfx=makeFixedLengthStr(ctf,6)
-                sdfx =makeFixedLengthStr(df,6)
-                sx = sctfx+" "+sdfx+" "+str(docID)+" "+str(tf)
+                #sctfx=makeFixedLengthStr(ctf,6)
+                #sdfx =makeFixedLengthStr(df,6)
+                sx = str(docID)+" "+str(tf)
                 map.seek(0)
                 map.resize(map.size()+len(sx))
                 sx=sx.encode("utf-8")
@@ -202,12 +203,12 @@ def getDocStuff(dDocProps):
         lAllLists.append(dDocProps[T])
     if (W in dDocProps):
         lAllLists.append(dDocProps[W])
-    if (B in dDocProps):
-        lAllLists.append(dDocProps[B])
+    #if (B in dDocProps):
+    #    lAllLists.append(dDocProps[B])
     if (A in dDocProps):
         lAllLists.append(dDocProps[A])
-    if (N in dDocProps):
-        lAllLists.append(dDocProps[N])
+    #if (N in dDocProps):
+    #    lAllLists.append(dDocProps[N])
 
     lAllLines = []
     for lList in lAllLists:
@@ -218,13 +219,19 @@ def getDocStuff(dDocProps):
         lWords = sLine.split()
         lAllWords.extend(lWords)
 
+    lAllWords = remStopWords(lAllWords)
 
-    #print("All words :", lAllWords,"\n")
-    lUniqueWords = list(set(lAllWords))
-    lenAllWords = len(lAllWords)
+    p = PorterStemmer()
+    lAllWordsStemmed = []
+    for word in lAllWords:
+        word = p.stem(word,0,len(word)-1)
+        lAllWordsStemmed.append(word)
+    #print("All words :", lAllWordsStemmed,"\n")
+    lUniqueWords = list(set(lAllWordsStemmed))
+    lenAllWords = len(lAllWordsStemmed)
     lenAllWords
-    sRet = makeFixedLengthStr(len(lAllWords),6)+" "+makeFixedLengthStr(len(lUniqueWords),6) #+":"+dDocProps[B][0]
-    return [sRet,lAllWords]
+    sRet = makeFixedLengthStr(len(lAllWordsStemmed),6)+" "+makeFixedLengthStr(len(lUniqueWords),6) #+":"+dDocProps[B][0]
+    return [sRet,lAllWordsStemmed]
 
 def makeFixedLengthStr(length,n):
     sLen =  str(length)
