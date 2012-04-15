@@ -6,13 +6,11 @@ from collections import Counter
 import contextlib
 from math import log
 from porter import PorterStemmer
+import helperFunctions
+import constants
 
 termSize = 15
-xencode = { 0:"00",1:"01",2:"02",3:"03",4:"04",5:"05",6:"06",7:"07",8:"08",9:"09","a":"10","b":"11","c":"12","d":"13","e":"14","f":"15","g":"16","h":"17","i":"18","j":"19","k":"20","l":"21","m":"22","n":"23","o":"24","p":"25","q":"26","r":"27","s":"28","t":"29","u":"30","v":"31","w":"32","x":"33","y":"34","z":"35"}
 
-
-
-#dFileContents = {} # {title:L,contents:L,date:L,author:L,entryDate:L}
 dFileData = {} # {docID:dFileContents}
 T ="T" #"title"
 W = "W" #"contents"
@@ -21,30 +19,12 @@ A = "A" #"author"
 N = "N" # "entryDate"
 I = "I" # "docID"
 X = "X" #ref
+
 termData = {} # term:L[ctf:df:D[docid:tf]]
 termsList = []
 stopwords_l = []
 termMapList = []
 
-def populateStopWords():
-    with open('stoplist.txt',encoding='utf-8') as stopwords_file:
-        for line in stopwords_file:
-            stopwords_l.append(line.replace("\n",""))
-
-def remStopWords(query_l):
-    words_l = []
-    for word_s in query_l:
-        if not word_s in stopwords_l:
-            words_l.append(word_s)
-    return words_l
-
-
-
-def getStr(dictP):
-    sRet = ""
-    for key, value in dictP.items():
-        sRet = sRet +" "+ str(key)+ " "+str(value)
-    return sRet
 
 
 def makeTermsList():
@@ -56,26 +36,6 @@ def makeTermsList():
         lenSstr = len(Sstr)
         termMapList.append(term+" "+str(offset)+" "+str(offset+lenSstr)+"\n")
         offset = offset+lenSstr
-
-def fillTerms1(docID,lTerms):
-    global termData
-    dWordsCnt = Counter(lTerms)
-    for term,cnt in dWordsCnt.items():
-       lTermProp = []
-       ctf = tf = cnt
-       df = 1
-       lTermProp = [ctf,df,{docID:tf}]
-       if term in termData:
-           lTermPropX = termData[term]
-           ctfX = lTermPropX[0]
-           dfX = lTermPropX[1]
-           tfX = lTermPropX[2]
-           lTermProp[0] = ctf+ctfX
-           lTermProp[1] = df+dfX
-           tfX[docID] = tf
-           lTermProp[2] = tfX
-
-       termData[term] = lTermProp
 
 
 def mergeTermFiles():
@@ -106,11 +66,17 @@ def mergeTermFiles():
 
     termFile = "./indexes/termsx.txt"
     termMapFile = "./indexes/termsMapy.txt"
+    termsListFile = "./indexes/termsList.txt"
+
     with open(termFile, "wb") as f:
         f.write(b"*")
     with open(termFile, "r+b") as f:
         # memory-map the file, size 0 means whole file
         map = mmap.mmap(f.fileno(), 0)
+        
+    fr =  open(termsListFile,"w")
+        
+        
 
     #with open(termMapFile, "wb") as f2:
      #   f2.write(b"*")
@@ -118,13 +84,14 @@ def mergeTermFiles():
         # memory-map the file, size 0 means whole file
       #  map2 = mmap.mmap(f2.fileno(), 0)
         
-
+        
             
 
         byteLen = 0
         for filex in files:
 
             if (filex[0:1] != "_"):
+                fr.write(filex+" ")
                 fx =  open("./indexes/tmp/"+filex, "r+b")
                 # memory-map the file, size 0 means whole file
                 map1 = mmap.mmap(fx.fileno(), 0)
@@ -142,7 +109,7 @@ def mergeTermFiles():
                 f2.write(Str.encode("utf-8"))
                
             
-            
+    fr.close()   
             
             
     #map.close()
@@ -223,7 +190,7 @@ def getDocStuff(dDocProps):
         lWords = sLine.split()
         lAllWords.extend(lWords)
 
-    lAllWords = remStopWords(lAllWords)
+    lAllWords = helperFunctions.remStopWords(lAllWords)
 
     p = PorterStemmer()
     lAllWordsStemmed = []
@@ -308,9 +275,9 @@ def makeIndexes():
     FILE2.writelines(termsList)
     FILE3.writelines(termMapList)    
 
-def fetchFromFile(fileName):
+def fetchFromFile():
     global T,W,B,A,N,I,dFileData
-    with open(fileName,encoding='utf-8') as inLinksFile:
+    with open(constants.filetoIndex,encoding=constants.encoding) as inLinksFile:
         dFileContents = {} # {title:S,contents:S,date:S,author:S,entryDate:S}
         dFile={} # {docID:dFileContents}
         previousProp=""
@@ -368,10 +335,10 @@ def fetchFromFile(fileName):
 
 def main(fileName):
     print("Started indexing : "+fileName)
-    populateStopWords()
-    fetchFromFile(fileName)
+    helperFunctions.populateStopWords()
+    fetchFromFile()
 #print(d)
 
 
-main(sys.argv[1])
+#main(sys.argv[1])
 

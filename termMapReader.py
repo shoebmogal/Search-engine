@@ -3,8 +3,11 @@ import sys
 import mmap
 import contextlib
 from porter import PorterStemmer
-# Now I will have to take the termMapy and convert it into a binary tree file
-with open('./indexes/termsMapy.txt', 'r') as f:
+import difflib
+import constants
+'''
+
+with open(constants.fSortedTermIndex, 'r') as f:
     with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
         n=3
         n=n-1
@@ -29,10 +32,10 @@ with open('./indexes/termsMapy.txt', 'r') as f:
                     
             bst(0,int(m.size()/35),m)
 
+'''
 
 
-
-with open('./indexes/termMapFileSorted1.txt', 'r') as f:
+with open(constants.termBTreeFile, 'r') as f:
     with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m1:
 
         def search(query,index,noOfNodes,m1):
@@ -67,8 +70,32 @@ with open('./indexes/termMapFileSorted1.txt', 'r') as f:
         lBytes = search(query,0,int(m1.size()/35),m1)
         print("lBytes : ",lBytes)
 
-        termFile = "./indexes/termsx.txt"
-        with open(termFile, "r+b") as f:
-            # memory-map the file, size 0 means whole file
-            map = mmap.mmap(f.fileno(), 0)
-            print("Term stuff :  ",map[int(lBytes[0]):int(lBytes[1])])
+        if(lBytes != None):
+            termFile = "./indexes/terms.txt"
+            with open(termFile, "r+b") as f:
+                # memory-map the file, size 0 means whole file
+                map = mmap.mmap(f.fileno(), 0)
+                print("Term stuff :  ",map[int(lBytes[0]):int(lBytes[1])])
+
+        else:
+            print("Not found")
+'''            termsListFile = "./indexes/termsList.txt"
+            fl = open(termsListFile,"r")
+            line = fl.read()
+            fl.close()
+            wordsList = line.split()
+            newWords = difflib.get_close_matches(query,wordsList)
+            #for word in newWords:
+            lBytes = search(newWords[0],0,int(m1.size()/35),m1)
+            print("lBytes : ",lBytes)
+
+            if(lBytes != None):
+                termFile = "./indexes/termsx.txt"
+                with open(termFile, "r+b") as f:
+                    # memory-map the file, size 0 means whole file
+                    map = mmap.mmap(f.fileno(), 0)
+                    print("Term stuff :  ",map[int(lBytes[0]):int(lBytes[1])])
+            else:
+                print("Not found")
+                        
+'''
