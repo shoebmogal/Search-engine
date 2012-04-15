@@ -84,7 +84,7 @@ def makeTermFiles(docID,lTerms):
             f.close()
         else:
             f=  open(term, "w")
-            f.write( term+" "+sdx)
+            f.write(sdx)
             f.close()
 
 
