@@ -131,7 +131,7 @@ def mergeTermFiles():
                 map1.seek(0)
                 map.resize(map.size()+map1.size())
                 map.write(map1[0:])
-                map.flush()
+                #map.flush()
             
                 
                 Str = makeFixedLengthSpace(filex,20)+" "+makeFixedLengthStr(byteLen,6)+" "+makeFixedLengthStr(byteLen+map1.size(),6)+"\n"
@@ -155,12 +155,13 @@ def fillTerms(docID,lTerms):
     for term,cnt in dWordsCnt.items():
         term = "./indexes/tmp/"+term
         lTermProp = []
-        ctf = tf = cnt
-        df = 1
+        tf = cnt
+        
+        sdx = " "+str(docID)+" "+str(tf)
         if os.path.isfile(term): 
-            with open(term, "r+b") as f:
+            with open(term, "a") as f:
                 # memory-map the file, size 0 means whole file
-                map = mmap.mmap(f.fileno(), 0)
+                #map = mmap.mmap(f.fileno(), 0)
                 #ctfx = int(map[0:6])
                 #dfx = int(map[7:13])
                 #sctfx=makeFixedLengthStr(ctfx+ctf,6)
@@ -170,27 +171,30 @@ def fillTerms(docID,lTerms):
                 #map.write(sx.encode("utf-8"))
                 #map.flush()
                 
-                fileLen = map.size()
-                sdx = " "+str(docID)+" "+str(tf)
-                map.seek(fileLen-1)
-                map.resize(fileLen+len(sdx))
-                map.write(sdx.encode("utf-8"))
-                map.flush()
-                map.close
+                #fileLen = map.size()
+                
+                #map.seek(fileLen-1)
+                #map.resize(fileLen+len(sdx))
+                #map.write(sdx.encode("utf-8"))
+                f.write(sdx)
+                f.close()
+                #map.flush()
+                #map.close
         else:
-            with open(term, "wb") as f:
-                f.write(b"*")
-            with open(term, "r+b") as f:
+            with open(term, "w") as f:
+                f.write( term+" "+sdx)
+                f.close()
+            #with open(term, "r+b") as f:
                 # memory-map the file, size 0 means whole file
-                map = mmap.mmap(f.fileno(), 0)
+             #   map = mmap.mmap(f.fileno(), 0)
                 #sctfx=makeFixedLengthStr(ctf,6)
                 #sdfx =makeFixedLengthStr(df,6)
-                sx = str(docID)+" "+str(tf)
-                map.seek(0)
-                map.resize(map.size()+len(sx))
-                sx=sx.encode("utf-8")
-                map.write(sx)
-                map.close
+              #  sx = str(docID)+" "+str(tf)
+              #  map.seek(0)
+              #  map.resize(map.size()+len(sx))
+              #  sx=sx.encode("utf-8")
+              #  map.write(sx)
+              #  map.close
 
         
 
