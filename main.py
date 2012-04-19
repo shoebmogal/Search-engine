@@ -2,14 +2,15 @@ import constants
 import sys
 import os
 import indexesInit
-import crawler
 import indexer
 
-constants.filetoIndex = sys.argv[1]
 
-def main():
+
+def main(fileToIndex):
+    constants.filetoIndex = fileToIndex
     indexesInit.main()
     #crawler.main(constants.filetoIndex)
     indexer.main()
     indexesInit.cleanup()
-main()    
+
+main(sys.argv[1])    

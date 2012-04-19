@@ -1,6 +1,6 @@
 #Server
 import socket
-from crawler import main
+import main
 
 HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50017              # Arbitrary non-privileged port
@@ -21,7 +21,7 @@ while True:
     print("Received : "+sData)
     lCmd = sData.split()
     if(lCmd[0] == "crawl"):
-        main(lCmd[1])
+        main.main(lCmd[1])
 
 conn.close()
 

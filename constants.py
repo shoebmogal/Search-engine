@@ -1,5 +1,4 @@
-Name = "Shoeb Ahmed Mogal"
-
+IndexName = 0
 #space
 space = " "
 newLine = "\n"
@@ -7,18 +6,22 @@ underscore = "_"
 
 #Index stuff
 rootDir = "."
-indexDir = rootDir+"/indexes"
-termsDir = indexDir+"/tmp"
+allCollsDir = rootDir+"/allCollections"
+indexDir = allCollsDir+"/indexes_"+str(IndexName)
+termsDir = indexDir+"/terms"
 filetoIndex = ""
 
 #Index files
 docFile = indexDir+"/d3.txt"
-docWordsFile = indexDir+"/docWords.txt"
+docCacheFile = indexDir+"/docCache.txt"
+docCacheIndexFile = indexDir+"/docIndexCache.txt"
 termsFile = indexDir+"/terms.txt"
 termsListFile = indexDir+"/termsList.txt"
 fSortedTermIndex = indexDir+"/termsMapy.txt"
 termBTreeFile = indexDir+"/termBTree.txt"
-
+collFile = indexDir+"/collInfo.txt"
+SortedCacheIndex = indexDir+"/sortedDocsIndex.txt"
+docCacheBTreeFile= indexDir+"/bTreeDocsIndex.txt"
 
 #Terms and DocIDs size
 docWordCntLen = 6
@@ -36,6 +39,7 @@ I = "I" # "docID"
 X = "X" #ref
 
 #stopwords list
+stopWordsFile=rootDir+"/stoplist.txt"
 stopwords_l = []
 
 
@@ -43,3 +47,8 @@ stopwords_l = []
 encoding="utf-8"
 
 
+#collection details
+numDocs=0
+numTerms = 0
+numUniqueTerms = 0
+allDocsLen = 0

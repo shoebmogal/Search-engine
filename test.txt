@@ -46,7 +46,9 @@ CA581203 JB March 22, 1978  8:28 PM
 3184	6	1
 .I 2
 .T
-Extraction of Roots by Repeated Subtractions for Digital Computers
+Extraction of Roots by Repeated Subtractions for Digital Computers Algebra
+.W
+shoeb likes Algebra
 .B
 CACM December, 1958
 .A

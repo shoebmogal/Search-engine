@@ -37244,6 +37244,7 @@ CA660407 JB March 3, 1978  10:39 AM
 A Method for Finding the Least Squares Estimate
 of the Intersection Point of Two Helices in Space
 .W
+Mogalz
 When the helical trajectories of two charged
 particles moving away from a common point in a 
 magnetic field are reconstructed from measurements on
@@ -37412,6 +37413,7 @@ CA660403g JB March 30, 1978  9:31 AM
 .T
 A Nonrecursive Method of Syntax Specification
 .W
+Shoebz
 The use of the Kleene regular expression notation
 for describing algebraic language syntax, 
 in particular of ALGOL, is described in this paper. 
